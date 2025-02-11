@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Detail Berita</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      background-color: #f9fafb;
+    }
+    .badge {
+      padding: 0.25rem 0.75rem;
+      border-radius: 9999px;
+      font-size: 0.875rem;
+      font-weight: 600;
+    }
+    .badge-primary {
+      background: linear-gradient(90deg, #6ee7b7, #3b82f6);
+      color: white;
+    }
+  </style>
+</head>
+<body class="min-h-screen bg-gray-100">
+  <header class="bg-blue-600 text-white py-4">
+    <div class="container mx-auto px-4 flex justify-between items-center">
+      <h1 class="text-2xl font-bold">Detail Berita</h1>
+      <a href="news.html" class="bg-white text-blue-600 px-4 py-2 rounded-md hover:bg-gray-200 transition duration-300 shadow-hover">
+        Kembali ke Berita
+      </a>
+    </div>
+  </header>
+
+  <main class="container mx-auto px-4 py-8">
+    <div id="newsDetail" class="bg-white p-6 rounded-lg shadow-md">
+      <!-- Detail berita akan ditampilkan di sini -->
+    </div>
+  </main>
+
+  <script>
+    // Konfigurasi Supabase
+    const supabaseUrl = "https://eyzvqdknrkkjznqvmxgb.supabase.co";
+    const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV5enZxZGtucmtranpucXZteGdiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzg0OTc1NzksImV4cCI6MjA1NDA3MzU3OX0.v-3bKrF431br9SKSXPzUOHU-f4CW_4SAgtSic502sbs";
+    const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
+
+    // Fungsi untuk memuat detail berita berdasarkan ID
+    async function loadNewsDetail(id) {
+      const { data, error } = await supabaseClient
+        .from('news')
+        .select('*')
+        .eq('id', id)
+        .single();
+
+      if (error) {
+        console.error('Error loading news detail:', error);
+        return;
+      }
+
+      const formattedDate = new Date(data.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+      const newsDetailContainer = document.getElementById('newsDetail');
+      newsDetailContainer.innerHTML = `
+        <div class="flex justify-between items-center mb-4">
+          <span class="badge badge-primary">${formattedDate}</span>
+        </div>
+        <h2 class="text-3xl font-bold mb-4">${data.title}</h2>
+        <div class="text-gray-700 mb-6">${data.content}</div>
+        <a href="news.html" class="text-blue-600 font-semibold hover:underline">
+          Kembali ke Daftar Berita
+        </a>
+      `;
+    }
+
+    // Ambil ID berita dari URL parameter
+    const urlParams = new URLSearchParams(window.location.search);
+    const newsId = urlParams.get('id');
+
+    // Load data saat halaman dimuat
+    window.onload = () => {
+      if (newsId) {
+        loadNewsDetail(newsId);
+      } else {
+        alert('ID berita tidak ditemukan!');
+        window.location.href = 'news.html';
+      }
+    };
+  </script>
+</body>
+</html>

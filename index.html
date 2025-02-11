@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Produktivitas Belajar</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+  <!-- Swiper.js CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/swiper/swiper-bundle.min.css" />
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      background-color: #f9fafb;
+    }
+    .hero {
+      background: linear-gradient(135deg, #6ee7b7, #3b82f6);
+      color: white;
+    }
+    .card-hover:hover {
+      transform: translateY(-5px);
+      transition: transform 0.3s ease-in-out;
+    }
+    .badge {
+      padding: 0.25rem 0.75rem;
+      border-radius: 9999px;
+      font-size: 0.875rem;
+      font-weight: 600;
+    }
+    .badge-primary {
+      background: linear-gradient(90deg, #6ee7b7, #3b82f6);
+      color: white;
+    }
+    .swiper-slide {
+      display: flex;
+      justify-content: center;
+    }
+    .countdown {
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: #3b82f6;
+    }
+    .live-badge {
+      background-color: #ef4444;
+      color: white;
+      padding: 0.25rem 0.75rem;
+      border-radius: 9999px;
+      font-size: 0.875rem;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+    }
+    .live-badge svg {
+      width: 16px;
+      height: 16px;
+      margin-right: 0.5rem;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col">
+  <!-- Hero Section -->
+  <section class="hero py-20 text-center">
+    <div class="container mx-auto px-4">
+      <h1 class="text-5xl font-bold mb-4">Produktivitas Belajar Nunu</h1>
+      <p class="text-xl mb-8">Kelola jadwal PKL Nunu dengan mudah dan efisien.</p>
+      <a href="schedule.html" class="bg-white text-blue-600 px-6 py-3 rounded-lg font-semibold hover:bg-gray-100 transition duration-300 shadow-hover">
+        Gasskan ay !
+      </a>
+    </div>
+  </section>
+
+  <!-- Jadwal PKL Hari Ini -->
+  <section class="py-16 bg-white">
+    <div class="container mx-auto px-4 text-center">
+      <h2 class="text-3xl font-bold mb-8">Jadwal PKL Hari Ini</h2>
+      <div id="currentSchedule" class="space-y-4">
+        <!-- Jadwal akan ditampilkan di sini -->
+      </div>
+    </div>
+  </section>
+
+  <!-- Berita Terbaru (Carousel) -->
+  <section class="py-16 bg-gray-100">
+    <div class="container mx-auto px-4">
+      <h2 class="text-3xl font-bold text-center mb-12">Berita Terbaru</h2>
+      <div class="swiper-container">
+        <div class="swiper-wrapper" id="newsCarousel">
+          <!-- Berita akan ditampilkan di sini -->
+        </div>
+        <div class="swiper-pagination"></div>
+        <div class="swiper-button-next"></div>
+        <div class="swiper-button-prev"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features Section -->
+  <section class="py-16 bg-white">
+    <div class="container mx-auto px-4">
+      <h2 class="text-3xl font-bold text-center mb-12">Fitur Unggulan</h2>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div class="text-center">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+          </svg>
+          <h3 class="text-xl font-semibold mt-4">Manajemen Jadwal</h3>
+          <p class="text-gray-600 mt-2">Atur jadwal PKL Anda dengan mudah.</p>
+        </div>
+        <div class="text-center">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
+          </svg>
+          <h3 class="text-xl font-semibold mt-4">Edit & Hapus Jadwal</h3>
+          <p class="text-gray-600 mt-2">Ubah atau hapus jadwal sesuai kebutuhan.</p>
+        </div>
+        <div class="text-center">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <h3 class="text-xl font-semibold mt-4">Tampilan Modern</h3>
+          <p class="text-gray-600 mt-2">Desain yang bersih dan responsif.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Swiper.js JS -->
+  <script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
+  <script>
+    // Konfigurasi Supabase
+    const supabaseUrl = "https://eyzvqdknrkkjznqvmxgb.supabase.co";
+    const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV5enZxZGtucmtranpucXZteGdiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzg0OTc1NzksImV4cCI6MjA1NDA3MzU3OX0.v-3bKrF431br9SKSXPzUOHU-f4CW_4SAgtSic502sbs";
+    const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
+
+    // Fungsi untuk memuat jadwal PKL hari ini
+    async function loadCurrentSchedule() {
+      const today = new Date().toISOString().split('T')[0];
+      const { data, error } = await supabaseClient
+        .from('schedules')
+        .select('*')
+        .gte('date', today)
+        .order('date', { ascending: true })
+        .limit(2); // Ambil jadwal hari ini dan berikutnya
+
+      if (error || data.length === 0) {
+        document.getElementById('currentSchedule').innerHTML = `
+          <p class="text-gray-600">Tidak ada jadwal PKL hari ini.</p>
+        `;
+        return;
+      }
+
+      const currentScheduleContainer = document.getElementById('currentSchedule');
+      currentScheduleContainer.innerHTML = ''; // Kosongkan kontainer sebelum memuat data baru
+
+      data.forEach((schedule, index) => {
+        const formattedDate = new Date(schedule.date).toLocaleDateString('id-ID', { day: 'numeric', month: 'long' });
+        const isLive = index === 0 && schedule.date === today;
+
+        const scheduleCard = document.createElement('div');
+        scheduleCard.className = 'bg-white p-6 rounded-lg shadow-md';
+        scheduleCard.innerHTML = `
+          <div class="flex justify-between items-center mb-4">
+            <span class="badge badge-primary">${formattedDate}</span>
+            ${isLive ? `
+              <span class="live-badge">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0-12v6m0-6a3 3 0 100 6 3 3 0 000-6z" />
+                </svg>
+                Live
+              </span>
+            ` : ''}
+          </div>
+          <h3 class="text-xl font-bold mb-2">${schedule.activity}</h3>
+          <p class="text-gray-600 mb-4">Shift: ${schedule.shift}</p>
+          ${index === 0 && !isLive ? `
+            <p class="text-green-600 font-semibold">Jadwal berikutnya hari ini!</p>
+          ` : ''}
+          ${index === 1 ? `
+            <p class="text-blue-600 font-semibold">Jadwal berikutnya besok: ${formattedDate}</p>
+          ` : ''}
+        `;
+        currentScheduleContainer.appendChild(scheduleCard);
+      });
+    }
+
+    // Fungsi untuk memuat berita terbaru ke carousel
+    async function loadNewsCarousel() {
+      const { data, error } = await supabaseClient
+        .from('news')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(6); // Ambil maksimal 6 berita
+
+      if (error) {
+        console.error('Error loading news:', error);
+        return;
+      }
+
+      const newsCarouselContainer = document.getElementById('newsCarousel');
+      newsCarouselContainer.innerHTML = ''; // Kosongkan kontainer sebelum memuat data baru
+
+      data.forEach(news => {
+        const formattedDate = new Date(news.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+        const shortDescription = news.content.length > 100 ? `${news.content.substring(0, 100)}...` : news.content;
+
+        const slide = document.createElement('div');
+        slide.className = 'swiper-slide';
+        slide.innerHTML = `
+          <div class="bg-white p-6 rounded-lg shadow-md card-hover">
+            <div class="flex justify-between items-center mb-4">
+              <span class="badge badge-primary">${formattedDate}</span>
+            </div>
+                        <h3 class="text-xl font-bold mb-2">${news.title}</h3>
+            <p class="text-gray-600 mb-4">${shortDescription}</p>
+            <div class="flex justify-end">
+              <a href="news-detail.html?id=${news.id}" class="text-blue-600 font-semibold hover:underline">
+                Selengkapnya
+              </a>
+            </div>
+          </div>
+        `;
+        newsCarouselContainer.appendChild(slide);
+      });
+
+      // Inisialisasi Swiper.js setelah data dimuat
+      const swiper = new Swiper('.swiper-container', {
+        slidesPerView: 1,
+        spaceBetween: 20,
+        breakpoints: {
+          640: {
+            slidesPerView: 2,
+          },
+          1024: {
+            slidesPerView: 3,
+          },
+        },
+        pagination: {
+          el: '.swiper-pagination',
+          clickable: true,
+        },
+        navigation: {
+          nextEl: '.swiper-button-next',
+          prevEl: '.swiper-button-prev',
+        },
+      });
+    }
+
+    // Load data saat halaman dimuat
+    window.onload = () => {
+      loadCurrentSchedule();
+      loadNewsCarousel();
+    };
+  </script>
+</body>
+</html>

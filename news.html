@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Berita dan Acara</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      background-color: #f9fafb;
+    }
+    .card-hover:hover {
+      transform: translateY(-5px);
+      transition: transform 0.3s ease-in-out;
+    }
+    .badge {
+      padding: 0.25rem 0.75rem;
+      border-radius: 9999px;
+      font-size: 0.875rem;
+      font-weight: 600;
+    }
+    .badge-primary {
+      background: linear-gradient(90deg, #6ee7b7, #3b82f6);
+      color: white;
+    }
+  </style>
+</head>
+<body class="min-h-screen bg-gray-100">
+  <header class="bg-blue-600 text-white py-4">
+    <div class="container mx-auto px-4 flex justify-between items-center">
+      <h1 class="text-2xl font-bold">Berita dan Acara</h1>
+      <a href="index.html" class="bg-white text-blue-600 px-4 py-2 rounded-md hover:bg-gray-200 transition duration-300 shadow-hover">
+        Kembali ke Beranda
+      </a>
+    </div>
+  </header>
+
+  <main class="container mx-auto px-4 py-8">
+    <h2 class="text-3xl font-bold mb-8">Daftar Berita dan Acara</h2>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6" id="newsGrid">
+      <!-- Berita akan ditampilkan di sini -->
+    </div>
+  </main>
+
+  <script>
+    // Konfigurasi Supabase
+    const supabaseUrl = "https://eyzvqdknrkkjznqvmxgb.supabase.co";
+    const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV5enZxZGtucmtranpucXZteGdiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzg0OTc1NzksImV4cCI6MjA1NDA3MzU3OX0.v-3bKrF431br9SKSXPzUOHU-f4CW_4SAgtSic502sbs";
+    const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
+
+    // Fungsi untuk memuat data berita dari Supabase
+    async function loadNews() {
+      const { data, error } = await supabaseClient
+        .from('news')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('Error loading news:', error);
+        return;
+      }
+
+      const newsGridContainer = document.getElementById('newsGrid');
+      newsGridContainer.innerHTML = ''; // Kosongkan kontainer sebelum memuat data baru
+
+      data.forEach(news => {
+        const formattedDate = new Date(news.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+        const shortDescription = news.content.length > 100 ? `${news.content.substring(0, 100)}...` : news.content;
+
+        const card = document.createElement('div');
+        card.className = 'bg-white p-6 rounded-lg shadow-md card-hover';
+        card.innerHTML = `
+          <div class="flex justify-between items-center mb-4">
+            <span class="badge badge-primary">${formattedDate}</span>
+          </div>
+          <h3 class="text-xl font-bold mb-2">${news.title}</h3>
+          <p class="text-gray-600 mb-4">${shortDescription}</p>
+          <div class="flex justify-end">
+            <a href="news-detail.html?id=${news.id}" class="text-blue-600 font-semibold hover:underline">
+              Selengkapnya
+            </a>
+          </div>
+        `;
+        newsGridContainer.appendChild(card);
+      });
+    }
+
+    // Load data saat halaman dimuat
+    window.onload = () => {
+      loadNews();
+    };
+  </script>
+</body>
+</html>

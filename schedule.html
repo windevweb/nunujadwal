@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Manajemen Jadwal PKL</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      background-color: #f9fafb;
+    }
+    .shadow-hover:hover {
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    }
+    .badge {
+      padding: 0.25rem 0.75rem;
+      border-radius: 9999px;
+      font-size: 0.875rem;
+      font-weight: 600;
+    }
+    .badge-pagi {
+      background: linear-gradient(90deg, #6ee7b7, #3b82f6);
+      color: white;
+    }
+    .badge-siang {
+      background: linear-gradient(90deg, #fbbf24, #f59e0b);
+      color: white;
+    }
+    .badge-malam {
+      background: linear-gradient(90deg, #9333ea, #7e22ce);
+      color: white;
+    }
+    .badge-libur {
+      background: linear-gradient(90deg, #ef4444, #dc2626);
+      color: white;
+    }
+  </style>
+</head>
+<body class="min-h-screen bg-gray-100">
+  <header class="bg-blue-600 text-white py-4">
+    <div class="container mx-auto px-4 flex justify-between items-center">
+      <h1 class="text-2xl font-bold">Manajemen Jadwal PKL</h1>
+      <a href="index.html" class="bg-white text-blue-600 px-4 py-2 rounded-md hover:bg-gray-200 transition duration-300 shadow-hover">
+        Kembali ke Beranda
+      </a>
+    </div>
+  </header>
+
+  <main class="container mx-auto px-4 py-8">
+    <!-- Search dan Filter -->
+    <div class="flex flex-col md:flex-row gap-4 mb-8">
+      <input type="date" id="searchDate" placeholder="Cari berdasarkan tanggal" class="border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:border-blue-500">
+      <select id="filterShift" class="border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:border-blue-500">
+        <option value="">Semua Shift</option>
+        <option value="Pagi">Pagi</option>
+        <option value="Siang">Siang</option>
+        <option value="Malam">Malam</option>
+        <option value="Libur">Libur</option>
+      </select>
+      <button id="applyFilterBtn" class="bg-blue-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-blue-700 transition duration-300 shadow-hover">
+        Terapkan Filter
+      </button>
+    </div>
+
+    <!-- Tombol Tambah Jadwal -->
+    <button id="addScheduleBtn" class="bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition duration-300 shadow-hover mb-8">
+      Tambah Jadwal Baru
+    </button>
+
+    <!-- Modal Form Tambah Jadwal -->
+    <div id="scheduleModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
+      <div class="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
+        <h2 class="text-2xl font-bold mb-4">Tambah Jadwal Baru</h2>
+        <form id="scheduleForm">
+          <div class="mb-4">
+            <label for="activity" class="block text-sm font-medium text-gray-700">Kegiatan</label>
+            <input type="text" id="activity" placeholder="Kegiatan" class="mt-1 block w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:border-blue-500">
+          </div>
+          <div class="mb-4">
+            <label for="shift" class="block text-sm font-medium text-gray-700">Shift</label>
+            <select id="shift" class="mt-1 block w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:border-blue-500">
+              <option value="Pagi">Pagi</option>
+              <option value="Siang">Siang</option>
+              <option value="Malam">Malam</option>
+              <option value="Libur">Libur</option>
+            </select>
+          </div>
+          <div class="mb-4">
+            <label for="date" class="block text-sm font-medium text-gray-700">Tanggal</label>
+            <input type="date" id="date" class="mt-1 block w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:border-blue-500">
+          </div>
+          <div class="flex justify-end">
+            <button type="button" id="closeModalBtn" class="bg-gray-300 text-gray-700 px-4 py-2 rounded-md mr-2 hover:bg-gray-400 transition duration-300">
+              Batal
+            </button>
+            <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition duration-300">
+              Simpan
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Notifikasi Pop-up -->
+    <div id="notification" class="hidden fixed top-4 right-4 bg-green-500 text-white px-4 py-2 rounded-md shadow-lg">
+      <p id="notificationMessage"></p>
+    </div>
+
+    <!-- Tabel Jadwal -->
+    <div class="bg-white p-6 rounded-lg shadow-md">
+      <h2 class="text-2xl font-bold mb-4">Daftar Jadwal PKL</h2>
+      <table class="w-full text-left">
+        <thead>
+          <tr class="border-b border-gray-300">
+            <th class="py-2">Kegiatan</th>
+            <th class="py-2">Shift</th>
+            <th class="py-2">Tanggal</th>
+            <th class="py-2">Aksi</th>
+          </tr>
+        </thead>
+        <tbody id="scheduleTable">
+          <!-- Data akan ditampilkan di sini -->
+        </tbody>
+      </table>
+    </div>
+  </main>
+
+  <script>
+    // Konfigurasi Supabase
+    const supabaseUrl = "https://eyzvqdknrkkjznqvmxgb.supabase.co";
+    const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV5enZxZGtucmtranpucXZteGdiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzg0OTc1NzksImV4cCI6MjA1NDA3MzU3OX0.v-3bKrF431br9SKSXPzUOHU-f4CW_4SAgtSic502sbs";
+    const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
+
+    // Referensi elemen DOM
+    const addScheduleBtn = document.getElementById('addScheduleBtn');
+    const scheduleModal = document.getElementById('scheduleModal');
+    const closeModalBtn = document.getElementById('closeModalBtn');
+    const scheduleForm = document.getElementById('scheduleForm');
+    const scheduleTable = document.getElementById('scheduleTable');
+    const notification = document.getElementById('notification');
+    const notificationMessage = document.getElementById('notificationMessage');
+    const searchDateInput = document.getElementById('searchDate');
+    const filterShiftSelect = document.getElementById('filterShift');
+    const applyFilterBtn = document.getElementById('applyFilterBtn');
+
+    let allSchedules = []; // Menyimpan semua data jadwal
+
+    // Fungsi untuk menampilkan notifikasi
+    function showNotification(message, isSuccess = true) {
+      notificationMessage.textContent = message;
+      notification.className = `fixed top-4 right-4 px-4 py-2 rounded-md shadow-lg ${
+        isSuccess ? 'bg-green-500 text-white' : 'bg-red-500 text-white'
+      }`;
+      notification.classList.remove('hidden');
+      setTimeout(() => {
+        notification.classList.add('hidden');
+      }, 3000);
+    }
+
+    // Fungsi untuk memuat data dari Supabase
+    async function loadSchedules() {
+      const { data, error } = await supabaseClient
+        .from('schedules')
+        .select('*')
+        .order('date', { ascending: true });
+
+      if (error) {
+        console.error('Error loading schedules:', error);
+        return;
+      }
+
+      allSchedules = data; // Simpan semua data jadwal
+      renderSchedules(data); // Render tabel dengan data baru
+    }
+
+    // Fungsi untuk merender tabel jadwal
+    function renderSchedules(data) {
+      scheduleTable.innerHTML = ''; // Kosongkan tabel sebelum memuat data baru
+      data.forEach(schedule => {
+        const formattedDate = new Date(schedule.date).toLocaleDateString('id-ID', { day: 'numeric', month: 'long' });
+        const badgeClass = `badge-${schedule.shift.toLowerCase()}`;
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td class="py-2">${schedule.activity}</td>
+          <td class="py-2"><span class="badge ${badgeClass}">${schedule.shift}</span></td>
+          <td class="py-2">${formattedDate}</td>
+          <td class="py-2">
+            <button class="bg-red-500 text-white px-3 py-1 rounded-md hover:bg-red-600 transition duration-300" onclick="deleteSchedule('${schedule.id}')">
+              Hapus
+            </button>
+          </td>
+        `;
+        scheduleTable.appendChild(row);
+      });
+    }
+
+    // Fungsi untuk menambahkan jadwal ke Supabase
+    async function addSchedule(activity, shift, date) {
+      const { data, error } = await supabaseClient
+        .from('schedules')
+        .insert([{ activity, shift, date }])
+        .single();
+
+      if (error) {
+        console.error('Error adding schedule:', error);
+        showNotification('Gagal menambahkan jadwal!', false);
+        return;
+      }
+
+      showNotification('Jadwal berhasil ditambahkan!');
+      loadSchedules(); // Muat ulang data setelah penambahan
+    }
+
+    // Fungsi untuk menghapus jadwal dari Supabase
+    async function deleteSchedule(id) {
+      const { error } = await supabaseClient
+        .from('schedules')
+        .delete()
+        .eq('id', id);
+
+      if (error) {
+        console.error('Error deleting schedule:', error);
+        showNotification('Gagal menghapus jadwal!', false);
+        return;
+      }
+
+      showNotification('Jadwal berhasil dihapus!');
+      loadSchedules(); // Muat ulang data setelah penghapusan
+    }
+
+    // Fungsi untuk mencari dan memfilter jadwal
+    function applyFilters() {
+      const searchDate = searchDateInput.value;
+      const filterShift = filterShiftSelect.value;
+
+      let filteredData = allSchedules;
+
+      // Filter berdasarkan tanggal
+      if (searchDate) {
+        filteredData = filteredData.filter(schedule => schedule.date === searchDate);
+      }
+
+      // Filter berdasarkan shift
+      if (filterShift) {
+        filteredData = filteredData.filter(schedule => schedule.shift === filterShift);
+      }
+
+      renderSchedules(filteredData); // Render tabel dengan data yang difilter
+    }
+
+    // Fungsi untuk mengirim notifikasi WhatsApp
+    function sendWhatsAppNotification() {
+      const today = new Date().toISOString().split('T')[0]; // Hari ini dalam format YYYY-MM-DD
+      const upcomingSchedules = allSchedules.filter(schedule => schedule.date === today);
+
+      if (upcomingSchedules.length > 0) {
+        upcomingSchedules.forEach(schedule => {
+          const message = `Halo! Ini pengingat untuk jadwal PKL Anda hari ini:\n\nKegiatan: ${schedule.activity}\nShift: ${schedule.shift}\nTanggal: ${new Date(schedule.date).toLocaleDateString('id-ID')}`;
+          const whatsappLink = `https://wa.me/?text=${encodeURIComponent(message)}`;
+          window.open(whatsappLink, '_blank');
+        });
+      } else {
+        alert('Tidak ada jadwal PKL hari ini.');
+      }
+    }
+
+    // Event listeners
+    addScheduleBtn.addEventListener('click', () => {
+      scheduleModal.classList.remove('hidden');
+    });
+
+    closeModalBtn.addEventListener('click', () => {
+      scheduleModal.classList.add('hidden');
+    });
+
+    scheduleForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const activity = document.getElementById('activity').value;
+      const shift = document.getElementById('shift').value;
+      const date = document.getElementById('date').value;
+
+      if (activity && shift && date) {
+        await addSchedule(activity, shift, date);
+        scheduleForm.reset();
+        scheduleModal.classList.add('hidden');
+      } else {
+        alert('Silakan isi semua kolom!');
+      }
+    });
+
+    applyFilterBtn.addEventListener('click', () => {
+      applyFilters();
+    });
+
+    // Load data saat halaman dimuat
+    window.onload = () => {
+      loadSchedules();
+    };
+
+    // Kirim notifikasi WhatsApp saat tombol ditekan
+    document.getElementById('sendWhatsAppBtn').addEventListener('click', () => {
+      sendWhatsAppNotification();
+    });
+  </script>
+</body>
+</html>
