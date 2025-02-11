@@ -13,33 +13,30 @@
     body {
       font-family: 'Poppins', sans-serif;
       background-color: #f9fafb;
+      overflow-x: hidden; /* Mencegah scroll horizontal */
     }
     .hero {
       background: linear-gradient(135deg, #6ee7b7, #3b82f6);
       color: white;
     }
-    .card-hover:hover {
-      transform: translateY(-5px);
+    .card-stroke {
+      border: 2px solid #3b82f6;
+      border-radius: 1rem;
+      padding: 1.5rem;
+      background-color: white;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
       transition: transform 0.3s ease-in-out;
     }
-    .badge {
+    .card-stroke:hover {
+      transform: translateY(-5px);
+    }
+    .badge-date {
+      background-color: #3b82f6;
+      color: white;
       padding: 0.25rem 0.75rem;
       border-radius: 9999px;
       font-size: 0.875rem;
       font-weight: 600;
-    }
-    .badge-primary {
-      background: linear-gradient(90deg, #6ee7b7, #3b82f6);
-      color: white;
-    }
-    .swiper-slide {
-      display: flex;
-      justify-content: center;
-    }
-    .countdown {
-      font-size: 1.5rem;
-      font-weight: bold;
-      color: #3b82f6;
     }
     .live-badge {
       background-color: #ef4444;
@@ -56,16 +53,91 @@
       height: 16px;
       margin-right: 0.5rem;
     }
+    .waiting-badge {
+      background-color: #3b82f6;
+      color: white;
+      padding: 0.25rem 0.75rem;
+      border-radius: 9999px;
+      font-size: 0.875rem;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+    }
+    .waiting-badge svg {
+      width: 16px;
+      height: 16px;
+      margin-right: 0.5rem;
+    }
+    .swiper-container {
+      width: 100%;
+      overflow: hidden; /* Pastikan tidak ada overflow */
+    }
+    .swiper-slide {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      width: 100%; /* Pastikan slide mengikuti lebar container */
+    }
+    .news-card {
+      max-width: 350px; /* Lebar maksimal card */
+      border: 1px solid #e5e7eb;
+      border-radius: 0.5rem;
+      overflow: hidden;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+      transition: transform 0.3s ease-in-out;
+    }
+    .news-card:hover {
+      transform: scale(1.05);
+    }
+    .news-card img {
+      width: 100%;
+      height: auto;
+      object-fit: cover;
+    }
+    .news-card .content {
+      padding: 1.5rem;
+    }
+    .news-card h5 {
+      font-size: 1.25rem;
+      font-weight: bold;
+      margin-bottom: 0.5rem;
+    }
+    .news-card p {
+      font-size: 0.875rem;
+      color: #6b7280;
+      margin-bottom: 1rem;
+    }
+    .news-card a {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.5rem 1rem;
+      font-size: 0.875rem;
+      font-weight: bold;
+      color: white;
+      background-color: #3b82f6;
+      border-radius: 0.375rem;
+      text-decoration: none;
+      transition: background-color 0.3s ease-in-out;
+    }
+    .news-card a:hover {
+      background-color: #2563eb;
+    }
+    .news-card a svg {
+      width: 1rem;
+      height: 1rem;
+      margin-left: 0.5rem;
+    }
   </style>
 </head>
 <body class="min-h-screen flex flex-col">
   <!-- Hero Section -->
   <section class="hero py-20 text-center">
     <div class="container mx-auto px-4">
-      <h1 class="text-5xl font-bold mb-4">Produktivitas Belajar Nunu</h1>
-      <p class="text-xl mb-8">Kelola jadwal PKL Nunu dengan mudah dan efisien.</p>
+      <h1 class="text-5xl font-bold mb-4">Selamat Datang di Produktivitas Belajar</h1>
+      <p class="text-xl mb-8">Kelola jadwal PKL Anda dengan mudah dan efisien.</p>
       <a href="schedule.html" class="bg-white text-blue-600 px-6 py-3 rounded-lg font-semibold hover:bg-gray-100 transition duration-300 shadow-hover">
-        Gasskan ay !
+        Mulai Sekarang
       </a>
     </div>
   </section>
@@ -74,7 +146,7 @@
   <section class="py-16 bg-white">
     <div class="container mx-auto px-4 text-center">
       <h2 class="text-3xl font-bold mb-8">Jadwal PKL Hari Ini</h2>
-      <div id="currentSchedule" class="space-y-4">
+      <div id="currentSchedule" class="space-y-6">
         <!-- Jadwal akan ditampilkan di sini -->
       </div>
     </div>
@@ -83,7 +155,10 @@
   <!-- Berita Terbaru (Carousel) -->
   <section class="py-16 bg-gray-100">
     <div class="container mx-auto px-4">
-      <h2 class="text-3xl font-bold text-center mb-12">Berita Terbaru</h2>
+      <div class="flex justify-between items-center mb-8">
+        <h2 class="text-3xl font-bold">Berita Terbaru</h2>
+        <a href="news.html" class="text-blue-600 font-semibold hover:underline">Lihat Semua Berita</a>
+      </div>
       <div class="swiper-container">
         <div class="swiper-wrapper" id="newsCarousel">
           <!-- Berita akan ditampilkan di sini -->
@@ -158,10 +233,10 @@
         const isLive = index === 0 && schedule.date === today;
 
         const scheduleCard = document.createElement('div');
-        scheduleCard.className = 'bg-white p-6 rounded-lg shadow-md';
+        scheduleCard.className = 'card-stroke';
         scheduleCard.innerHTML = `
           <div class="flex justify-between items-center mb-4">
-            <span class="badge badge-primary">${formattedDate}</span>
+            <span class="badge-date">${formattedDate}</span>
             ${isLive ? `
               <span class="live-badge">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -169,16 +244,17 @@
                 </svg>
                 Live
               </span>
-            ` : ''}
+            ` : `
+              <span class="waiting-badge">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                </svg>
+                Next Jadwal
+              </span>
+            `}
           </div>
           <h3 class="text-xl font-bold mb-2">${schedule.activity}</h3>
           <p class="text-gray-600 mb-4">Shift: ${schedule.shift}</p>
-          ${index === 0 && !isLive ? `
-            <p class="text-green-600 font-semibold">Jadwal berikutnya hari ini!</p>
-          ` : ''}
-          ${index === 1 ? `
-            <p class="text-blue-600 font-semibold">Jadwal berikutnya besok: ${formattedDate}</p>
-          ` : ''}
         `;
         currentScheduleContainer.appendChild(scheduleCard);
       });
@@ -207,15 +283,16 @@
         const slide = document.createElement('div');
         slide.className = 'swiper-slide';
         slide.innerHTML = `
-          <div class="bg-white p-6 rounded-lg shadow-md card-hover">
-            <div class="flex justify-between items-center mb-4">
-              <span class="badge badge-primary">${formattedDate}</span>
-            </div>
-                        <h3 class="text-xl font-bold mb-2">${news.title}</h3>
-            <p class="text-gray-600 mb-4">${shortDescription}</p>
-            <div class="flex justify-end">
-              <a href="news-detail.html?id=${news.id}" class="text-blue-600 font-semibold hover:underline">
-                Selengkapnya
+          <div class="news-card">
+            <img src="https://media.istockphoto.com/id/1065782390/id/foto/aplikasi-berita-seluler-di-smartphone-pria-membaca-berita-online-di-situs-web-dengan-ponsel.jpg?s=1024x1024&w=is&k=20&c=WPiAL3YjLMIkKTJpQmqzlhPAq-MA_LVCEjFVB-esSJs=" alt="${news.title}" />
+            <div class="content">
+              <h5>${news.title}</h5>
+              <p>${shortDescription}</p>
+              <a href="news-detail.html?id=${news.id}">
+                Read more
+                <svg class="rtl:rotate-180 w-3.5 h-3.5 ms-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 10">
+                  <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 5h12m0 0L9 1m4 4L9 9"/>
+                </svg>
               </a>
             </div>
           </div>
@@ -225,10 +302,14 @@
 
       // Inisialisasi Swiper.js setelah data dimuat
       const swiper = new Swiper('.swiper-container', {
-        slidesPerView: 1,
+        slidesPerView: 'auto',
         spaceBetween: 20,
+        centeredSlides: false,
         breakpoints: {
           640: {
+            slidesPerView: 1.5,
+          },
+          768: {
             slidesPerView: 2,
           },
           1024: {
